@@ -1,0 +1,289 @@
+{
+  "info": {
+    "name": "Keycloak Starter Kit",
+    "description": "Complete Postman collection for the Keycloak Starter Kit.\n\nSteps:\n1. Run 'Step 1 - Get Token (Password Grant)' first\n2. The token auto-saves to {{access_token}} variable\n3. All protected requests automatically use it",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "keycloak_url",    "value": "http://localhost:8080" },
+    { "key": "realm",           "value": "starter-realm" },
+    { "key": "client_id",       "value": "postman-client" },
+    { "key": "client_secret",   "value": "postman-secret-5678" },
+    { "key": "backend_url",     "value": "http://localhost:9090" },
+    { "key": "access_token",    "value": "" },
+    { "key": "refresh_token",   "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": " Auth Flows",
+      "item": [
+
+        {
+          "name": "Step 1 - Get Token (Password Grant - Admin)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var res = pm.response.json();",
+                "pm.collectionVariables.set('access_token', res.access_token);",
+                "pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "console.log(' Token saved to collection variables');"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type",    "value": "password" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "username",      "value": "admin-user" },
+                { "key": "password",      "value": "admin123" },
+                { "key": "scope",         "value": "openid" }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Step 1b - Get Token (Password Grant - Manager)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var res = pm.response.json();",
+                "pm.collectionVariables.set('access_token', res.access_token);",
+                "pm.collectionVariables.set('refresh_token', res.refresh_token);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type",    "value": "password" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "username",      "value": "manager-user" },
+                { "key": "password",      "value": "manager123" },
+                { "key": "scope",         "value": "openid" }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Step 1c - Get Token (Password Grant - Regular User)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var res = pm.response.json();",
+                "pm.collectionVariables.set('access_token', res.access_token);",
+                "pm.collectionVariables.set('refresh_token', res.refresh_token);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type",    "value": "password" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "username",      "value": "regular-user" },
+                { "key": "password",      "value": "user123" },
+                { "key": "scope",         "value": "openid" }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Client Credentials Flow (Service-to-Service)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var res = pm.response.json();",
+                "console.log('Service token type:', res.token_type);",
+                "console.log('Expires in:', res.expires_in, 'seconds');"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type",    "value": "client_credentials" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Refresh Token Flow",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var res = pm.response.json();",
+                "pm.collectionVariables.set('access_token', res.access_token);",
+                "pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "console.log(' Tokens rotated successfully');"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type",    "value": "refresh_token" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "refresh_token", "value": "{{refresh_token}}" }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Token Introspection",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token/introspect",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "token",         "value": "{{access_token}}" },
+                { "key": "client_id",     "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": " Backend API - Public",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{backend_url}}/api/public/health"
+          }
+        },
+        {
+          "name": "App Info",
+          "request": {
+            "method": "GET",
+            "url": "{{backend_url}}/api/public/info"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": " Backend API - User (any auth)",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/user/me"
+          }
+        },
+        {
+          "name": "User Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/user/dashboard"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": " Backend API - Manager",
+      "item": [
+        {
+          "name": "Get Reports (Manager+)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/manager/reports"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": " Backend API - Admin Only",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/admin/users"
+          }
+        },
+        {
+          "name": "Create New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{backend_url}}/api/admin/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"new-user\",\n  \"email\": \"newuser@example.com\",\n  \"firstName\": \"New\",\n  \"lastName\": \"User\",\n  \"password\": \"newpass123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/admin/users/:userId/roles/ROLE_MANAGER"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{backend_url}}/api/admin/users/:userId"
+          }
+        }
+      ]
+    }
+  ]
+}

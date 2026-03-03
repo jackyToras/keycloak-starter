@@ -1,0 +1,39 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: keycloak-starter-backend
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:starter-realm}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:starter-realm}
+
+      client:
+        registration:
+          keycloak:
+            client-id: ${KEYCLOAK_CLIENT_ID:backend-service}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:backend-secret-1234}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            token-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:starter-realm}/protocol/openid-connect/token
+
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:starter-realm}
+  admin-realm: master
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin123
+  client-id: ${KEYCLOAK_CLIENT_ID:backend-service}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:backend-secret-1234}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.keycloak.starter: DEBUG
